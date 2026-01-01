@@ -10,6 +10,7 @@ import (
 
 	"github.com/saad7890/movie-reservation/internal/config"
 	"github.com/saad7890/movie-reservation/internal/db"
+	"github.com/saad7890/movie-reservation/internal/db/migrate"
 	httpapp "github.com/saad7890/movie-reservation/internal/http"
 )
 
@@ -31,6 +32,12 @@ func main() {
 		log.Fatalf("database connection failed: %v", err)
 	}
 	defer database.Close()
+
+	// Run migrations
+	ctx := context.Background()
+	if err := migrate.Run(ctx, database, "internal/db/schema"); err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
+	}
 
 	log.Println("Database connected")
 
