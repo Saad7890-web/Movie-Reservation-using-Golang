@@ -10,6 +10,7 @@ type Config struct {
 	AppEnv   string
 	HTTPPort string
 	DB       DBConfig
+	Auth     AuthConfig
 }
 
 type DBConfig struct {
@@ -20,7 +21,10 @@ type DBConfig struct {
 	Password string
 	SSLMode  string
 }
-
+type AuthConfig struct {
+	JWTSecret   string
+	JWTExpHours int
+}
 func Load() (*Config, error) {
 	cfg := &Config{
 		AppName:  os.Getenv("APP_NAME"),
@@ -33,6 +37,10 @@ func Load() (*Config, error) {
 			User:     os.Getenv("DB_USER"),
 			Password: os.Getenv("DB_PASSWORD"),
 			SSLMode:  os.Getenv("DB_SSLMODE"),
+		},
+		Auth: AuthConfig{
+			JWTSecret:   os.Getenv("JWT_SECRET"),
+			JWTExpHours: 24,
 		},
 	}
 
