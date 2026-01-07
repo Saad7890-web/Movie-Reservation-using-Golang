@@ -1,0 +1,2 @@
+-- no-op rollback
+-- password rollback intentionally skipped
