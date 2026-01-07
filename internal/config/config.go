@@ -1,52 +1,46 @@
 package config
 
 import (
-	"fmt"
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppName  string
-	AppEnv   string
-	HTTPPort string
-	DB       DBConfig
-	Auth     AuthConfig
+	AppEnv  string
+	AppPort string
+
+	DBHost     string
+	DBPort     string
+	DBUser     string
+	DBPassword string
+	DBName     string
+	DBSSLMode  string
 }
 
-type DBConfig struct {
-	Host     string
-	Port     string
-	Name     string
-	User     string
-	Password string
-	SSLMode  string
-}
-type AuthConfig struct {
-	JWTSecret   string
-	JWTExpHours int
-}
-func Load() (*Config, error) {
-	cfg := &Config{
-		AppName:  os.Getenv("APP_NAME"),
-		AppEnv:   os.Getenv("APP_ENV"),
-		HTTPPort: os.Getenv("HTTP_PORT"),
-		DB: DBConfig{
-			Host:     os.Getenv("DB_HOST"),
-			Port:     os.Getenv("DB_PORT"),
-			Name:     os.Getenv("DB_NAME"),
-			User:     os.Getenv("DB_USER"),
-			Password: os.Getenv("DB_PASSWORD"),
-			SSLMode:  os.Getenv("DB_SSLMODE"),
-		},
-		Auth: AuthConfig{
-			JWTSecret:   os.Getenv("JWT_SECRET"),
-			JWTExpHours: 24,
-		},
+func Load() *Config {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("⚠️ No .env file found, using system env")
 	}
 
-	if cfg.HTTPPort == "" {
-		return nil, fmt.Errorf("HTTP_PORT not set")
-	}
+	return &Config{
+		AppEnv:  getEnv("APP_ENV", "development"),
+		AppPort: getEnv("APP_PORT", "8080"),
 
-	return cfg, nil
+		DBHost:     getEnv("DB_HOST", "localhost"),
+		DBPort:     getEnv("DB_PORT", "5432"),
+		DBUser:     getEnv("DB_USER", "postgres"),
+		DBPassword: getEnv("DB_PASSWORD", ""),
+		DBName:     getEnv("DB_NAME", "movie_reservation"),
+		DBSSLMode:  getEnv("DB_SSLMODE", "disable"),
+	}
+}
+
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
 }

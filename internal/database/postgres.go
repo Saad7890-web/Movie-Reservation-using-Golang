@@ -1,23 +1,24 @@
-package db
+package database
 
 import (
 	"database/sql"
 	"fmt"
-	"time"
+	"log"
+
+	"movie-reservation-system/internal/config"
 
 	_ "github.com/lib/pq"
-	"github.com/saad7890/movie-reservation/internal/config"
 )
 
-func NewPostgres(cfg config.DBConfig) (*sql.DB, error) {
+func NewPostgresDB(cfg *config.Config) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host,
-		cfg.Port,
-		cfg.User,
-		cfg.Password,
-		cfg.Name,
-		cfg.SSLMode,
+		cfg.DBHost,
+		cfg.DBPort,
+		cfg.DBUser,
+		cfg.DBPassword,
+		cfg.DBName,
+		cfg.DBSSLMode,
 	)
 
 	db, err := sql.Open("postgres", dsn)
@@ -25,14 +26,14 @@ func NewPostgres(cfg config.DBConfig) (*sql.DB, error) {
 		return nil, err
 	}
 
-
+	
 	db.SetMaxOpenConns(25)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	db.SetMaxIdleConns(10)
 
 	if err := db.Ping(); err != nil {
 		return nil, err
 	}
 
+	log.Println("Connected to PostgreSQL")
 	return db, nil
 }
