@@ -49,7 +49,7 @@ func (r *userRepository) FindByEmail(email string) (*domain.User, error) {
 	err := row.Scan(
 		&user.ID,
 		&user.Name,
-		&user.Email
+		&user.Email,
 		&user.PasswordHash,
 		&user.IsActive,
 		&user.Role.ID,
@@ -61,4 +61,86 @@ func (r *userRepository) FindByEmail(email string) (*domain.User, error) {
 	}
 	return user, err
 }
+
+func (r *userRepository) FindByID(id string) (*domain.User, error) {
+	query := `
+		SELECT 
+			u.id,
+			u.name,
+			u.email,
+			u.password_hash,
+			u.is_active,
+			u.created_at,
+			u.updated_at,
+			r.id,
+			r.name
+		FROM users u
+			u.id,
+			u.name,
+			u.email,
+			u.password_hash,
+			u.is_active,
+			u.created_at,
+			u.updated_at,
+			r.id,
+			r.name
+		FROM users u
+		JOIN roles r ON u.role_id = r.id
+		WHERE u.id = $1
+	`
+
+	var user domain.User
+	var role domain.Role
+
+	err := r.db.QueryRow(query, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.PasswordHash,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&role.ID,
+		&role.Name,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("user not found")
+		}
+		return nil, err
+	}
+
+	user.Role = role
+	return &user, nil
+}
+
+
+func (r *userRepository) UpdateRole(userID string, roleName string) error {
+	query := `
+		UPDATE users
+		SET role_id = (
+			SELECT id FROM roles WHERE name = $1
+		),
+		updated_at = NOW()
+		WHERE id = $2
+	`
+
+	result, err := r.db.Exec(query, roleName, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("user or role not found")
+	}
+
+	return nil
+}
+
 
