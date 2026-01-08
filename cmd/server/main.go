@@ -2,11 +2,13 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"movie-reservation-system/internal/config"
 	"movie-reservation-system/internal/database"
+	"movie-reservation-system/internal/handler"
+	"movie-reservation-system/internal/repository/postgres"
 	"movie-reservation-system/internal/server"
+	"movie-reservation-system/internal/service"
 )
 
 func main() {
@@ -18,12 +20,12 @@ func main() {
 	}
 	defer db.Close()
 
+	userRepo := postgres.NewUserRepository(db)
+	authService := service.NewAuthService(userRepo)
+	authHandler := handler.NewAuthHandler(authService)
 	
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
-	})
-
+	mux := server.SetupRoutes(authHandler)
+	
 	srv := server.New(cfg.AppPort, mux)
 	srv.Start()
 }
