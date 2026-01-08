@@ -22,10 +22,10 @@ func (r *userRepository) Create(user *domain.User) error {
 	_, err := r.db.Exec(
 		query,
 		user.ID,
-		user.Name
-		user.Email
-		user.PasswordHash
-		user.Role.ID
+		user.Name,
+		user.Email,
+		user.PasswordHash,
+		user.Role.ID,
 
 	)
 
