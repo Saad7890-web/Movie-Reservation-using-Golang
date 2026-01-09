@@ -23,8 +23,9 @@ func main() {
 	userRepo := postgres.NewUserRepository(db)
 	authService := service.NewAuthService(userRepo)
 	authHandler := handler.NewAuthHandler(authService)
+	adminHandler := handler.NewAdminHandler()
 	
-	mux := server.SetupRoutes(authHandler)
+	mux := server.SetupRoutes(authHandler, adminHandler)
 	
 	srv := server.New(cfg.AppPort, mux)
 	srv.Start()

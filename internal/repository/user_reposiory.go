@@ -8,3 +8,4 @@ type UserRepository interface {
 	FindByID(id string) (*domain.User, error)
 	UpdateRole(userID string, roleName string) error
 }
+

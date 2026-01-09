@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("CHANGE_ME_SECRET")
+var jwtSecret = []byte("Saad5918")
 
 func GenerateToken(userID, role string) (string, error) {
 	claims := jwt.MapClaims{

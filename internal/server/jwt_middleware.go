@@ -11,20 +11,26 @@ type contextKey string
 
 const userContextKey contextKey = "user"
 
-func JWTMiddleware(next http.Handler)http.Handler{
+func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == ""{
-			http.Error(w, "Missing header", http.StatusUnauthorized)
+		if authHeader == "" {
+			http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
 			return
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer")
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := parts[1]
 
 		claims, err := security.ValidateToken(tokenString)
-
 		if err != nil {
-			http.Error(w, "invalid token", http.StatusUnauthorized)
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
 
